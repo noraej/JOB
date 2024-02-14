@@ -1,57 +1,80 @@
-# Join-Order-Benchmark
-
-> Based on [https://github.com/winkyao/join-order-benchmark](https://github.com/winkyao/join-order-benchmark)
-
-This package contains the Join Order Benchmark (JOB) queries from:
-"[How Good Are Query Optimizers, Really?](http://www.vldb.org/pvldb/vol9/p204-leis.pdf)"
-by Viktor Leis, Andrey Gubichev, Atans Mirchev, Peter Boncz, Alfons Kemper, Thomas Neumann
-PVLDB Volume 9, No. 3, 2015
-
-The `csv_files/imdb-create-tables.sql` and `queries/*.sql` are modified to MySQL syntax.
-
-## Quick Start
-
-1. Obtain the data:
+#### 1. Obtain data
+    
 ```shell
-cd csv_files/
-wget http://homepages.cwi.nl/~boncz/job/imdb.tgz
-tar -xvzf imdb.tgz
+    cd csv_files/
+    wget http://homepages.cwi.nl/~boncz/job/imdb.tgz
+    tar -xvzf imdb.tgz
 ```
 
-2. Launch the database server and connect
-3. Create IMDb tables in MySQL:
+#### 2. Launch the database server
+First time: 
+ ```shell
+    ./mtr --mem --start   
+ ```
+
+ Dirty start:
+  ```shell
+    ./mtr --mem --start-dirty
+ ```
+
+ ### 3. Connect to the database server
+
+ ```shell
+~/Documents/Master/Code/mysql-server-join-hint/build/bin/mysql --local-infile=1 -u root -S /var/folders/k0/qhfn3fhn0wd8t_kc0ksszklh0000gp/T/s4wGH1Wb5i/mysqld.1.sock
+ ```
+
+ 
+
+ ### 4. Create IMDB tables in MySQL
+ ```sqlmysql
+SOURCE /Users/nora/Documents/Master/Code/Helper/JOB/join-order-benchmark/csv_files/imdb-create-tables.sql;
+```
+
+### 5. Load the data in MySQL 
+
+Do this one by one to allow recovery to happen if anything goes wrong. 
 
 ```sqlmysql
-mysql> SOURCE /Users/olafrosendahl/Documents/GitHub/join-order-benchmark/csv_files/imdb-create-tables.sql
+SOURCE /Users/nora/Documents/Master/Code/Helper/JOB/join-order-benchmark/csv_files/imdb-load-data-1.sql;
 ```
+Back up folder from `(../../mysql-server-join-hint/build/mysql-test/var/data)`
 
-4. Load data in MySQL, one-by-one to allow recovery if an error happens and corrupts database.
 ```sqlmysql
-mysql> SOURCE /Users/olafrosendahl/Documents/GitHub/join-order-benchmark/csv_files/imdb-load-data-1.sql
-mysql> SOURCE /Users/olafrosendahl/Documents/GitHub/join-order-benchmark/csv_files/imdb-load-data-2.sql
-mysql> SOURCE /Users/olafrosendahl/Documents/GitHub/join-order-benchmark/csv_files/imdb-load-data-3.sql
-mysql> SOURCE /Users/olafrosendahl/Documents/GitHub/join-order-benchmark/csv_files/imdb-load-data-4.sql
-mysql> SOURCE /Users/olafrosendahl/Documents/GitHub/join-order-benchmark/csv_files/imdb-load-data-5.sql
+SOURCE /Users/nora/Documents/Master/Code/Helper/JOB/join-order-benchmark/csv_files/imdb-load-data-2.sql;
 ```
-
-Copy the data-directory between each command to allow rollback if an error occur. The data-directory to make a copy of is:
-`/build/mysql-test/var/mysqld.1/data`
-
-5. Add indexes to the IMDb database in MySQL
+Back up folder from `(../../mysql-server-join-hint/build/mysql-test/var/data)`
 ```sqlmysql
-mysql> SOURCE /Users/olafrosendahl/Documents/GitHub/join-order-benchmark/csv_files/imdb-index-tables.sql
+SOURCE /Users/nora/Documents/Master/Code/Helper/JOB/join-order-benchmark/csv_files/imdb-load-data-3.sql;
+```
+Back up folder from `(../../mysql-server-join-hint/build/mysql-test/var/data)`
+```sqlmysql
+SOURCE /Users/nora/Documents/Master/Code/Helper/JOB/join-order-benchmark/csv_files/imdb-load-data-4.sql;
+```
+Back up folder from `(../../mysql-server-join-hint/build/mysql-test/var/data)`
+```sqlmysql
+SOURCE /Users/nora/Documents/Master/Code/Helper/JOB/join-order-benchmark/csv_files/imdb-load-data-5.sql;
+```
+Back up folder from `(../../mysql-server-join-hint/build/mysql-test/var/data)`
+### 6. Add idexes to the imdb databse
+```sqlmysql
+SOURCE /Users/nora/Documents/Master/Code/Helper/JOB/join-order-benchmark/csv_files/imdb-index-tables.sql
 ```
 
-## Running the queries
-
-We use [hyperfine](https://github.com/sharkdp/hyperfine) as a benchmarking-tool to measure the queries, you'll therefore need to install it before running the queries. To run all queries, run the following in your terminal:
-
-```bash
+### 7. Running the queries
+We use hyperfine as a benchmarking-tool to measure the queries, you'll therefore need to install it before running the queries. To run all queries, run the following in your terminal:
+```sqlmysql
 $ ./run_queries.sh
 ```
 
-This will run the queries in the [queries-folder](./queries/) one-by-one, both with and without re-optimization, and output the results into the [results-folder](./results/) as both markdown and json-files for each query. You'll be able to see the progress in the terminal as the queries are being executed.
+This will run the queries in the queries-folder one-by-one, both with and without re-optimization, and output the results into the results-folder as both markdown and json-files for each query. You'll be able to see the progress in the terminal as the queries are being executed.
 
-### Order Problem
-
+### 8. Order Problem
 Please note that `queries/17b.sql` and `queries/8d.sql` may exhibit order issues due to the use of different order rules from MySQL. This is not a real bug.
+
+### 9. Collect results
+
+Run 
+
+```shell
+/usr/local/bin/python3 /Users/nora/Documents/Master/Code/Helper/JOB/join-order-benchmark/gatherResults.py 
+```
