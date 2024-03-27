@@ -1,7 +1,6 @@
 import json
 import os
 from collections import defaultdict
-import matplotlib.pyplot as plt
 
 
 #directory where results are stores
