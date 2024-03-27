@@ -2,7 +2,7 @@
 set -e
 
 CURDIR=$(cd `dirname $0`; pwd)
-OUTDIR=$CURDIR/results/round1/
+OUTDIR=$CURDIR/results/round2/
 
 if [ ! -e $OUTDIR ]; then
   mkdir -p $OUTDIR
@@ -10,8 +10,8 @@ fi
 
 cd $CURDIR
 
+mysql_sock="/var/folders/k0/qhfn3fhn0wd8t_kc0ksszklh0000gp/T/Fb7pMsFHE5/mysqld.1.sock"
 mysql_client="~/Documents/Master/Code/mysql-server-robust-planning/build-release/bin/mysql"
-mysql_sock="/var/folders/k0/qhfn3fhn0wd8t_kc0ksszklh0000gp/T/rfSFtaLa0_/mysqld.1.sock"
 
 export mysql_connect="$mysql_client -u root -S $mysql_sock -D imdbload -t"
 
@@ -51,7 +51,7 @@ ANALYZE TABLE role_type;
 ANALYZE TABLE title;
 eof"
 
-for file in `ls queries/1*.sql`; do
+for file in `ls queries/*.sql`; do
   bname=`basename $file`
   name=${bname%.*}
   outputmarkdown=$OUTDIR/$name.md

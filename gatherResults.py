@@ -1,16 +1,17 @@
 import json
 import os
 from collections import defaultdict
+import matplotlib.pyplot as plt
 
 
 #directory where results are stores
-directory = "join-order-benchmark/results/tester_res"
+directory = "results/res"
 
 #output path for json file
-output_path_json = "join-order-benchmark/results/collected_res/all_queries.json"
+output_path_json = "results/collected_res/all_queries.json"
 
 #output path for md file
-output_path_md = "join-order-benchmark/results/collected_res/all_queries.md"
+output_path_md = "results/collected_res/all_queries.md"
 
 
 
@@ -42,6 +43,11 @@ def sort_results(data):
     for source_file in sorted(data.keys()):
         sorted_data[source_file] = data[source_file]
     return sorted_data
+
+no_force_counter = 0
+hj_counter = 0
+nlj_counter = 0
+
 
 # Identifies interesting results 
 def compare(noForce, nlj, hj):
@@ -106,15 +112,25 @@ with open(output_path_md, 'w') as md_file:
         nljMean = ''
 
         for result in data["results"]:
-            if(result["command"]== "normal_run"):
+            if(result["command"] == "normal_run"):
                 normMean = result["mean"]
-            if(result["command"]== "with_nested_loop_join"):
+            if(result["command"] == "with_nested_loop_join"):
                 nljMean = result["mean"]
             
-            if(result["command"]== "with_hash_join"):
+            if(result["command"] == "with_hash_join"):
                 hjMean = result["mean"]
 
         interesting_flag = compare(normMean, nljMean, hjMean)
+
+        if(interesting_flag == "Not interesting"):
+            no_force_counter = no_force_counter + 1 
+        
+        if(interesting_flag == "Nested loop was not chosen, but it was faster"):
+            nlj_counter = nlj_counter + 1 
+        
+        if(interesting_flag == "Hash join was not chosen, but is faster"):
+            hj_counter = hj_counter + 1 
+        
 
         md_file.write(f"## {interesting_mark(interesting_flag)} {convertFileName(source_file)}\n\n")
         md_file.write(interesting_flag + " \n\n")
@@ -130,3 +146,6 @@ with open(output_path_md, 'w') as md_file:
             max_val = str(round(result["max"], 2))
 
             md_file.write(f"| {command} | {mean} | {stddev} | {median} | {min_val} | {max_val} |\n")
+
+
+print("No force: ", no_force_counter, " hash: ", hj_counter, "nlj: ", nlj_counter)
