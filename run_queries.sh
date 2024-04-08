@@ -2,7 +2,7 @@
 set -e
 
 CURDIR=$(cd `dirname $0`; pwd)
-OUTDIR=$CURDIR/results/round2/
+OUTDIR=$CURDIR/results/round3/
 
 if [ ! -e $OUTDIR ]; then
   mkdir -p $OUTDIR
@@ -60,10 +60,10 @@ for file in `ls queries/*.sql`; do
 
   original_query=$(<$file)
   export query=${original_query/";"/"\G"}
-  export query_normal=${query/"SELECT "/"SELECT /*+ SET_VAR(sql_buffer_result=1) */ "}
+  export query_normal=${query}
   
-  export query_hash_join=${query/"SELECT "/"SELECT /*+ SET_VAR(sql_buffer_result=1) FORCE_JOIN(HJ) */ "}
-  export query_nested_loop_join=${query/"SELECT "/"SELECT /*+ SET_VAR(sql_buffer_result=1) FORCE_JOIN(NLJ) */ "}
+  export query_hash_join=${query/"SELECT "/"SELECT /*+ FORCE_JOIN(HJ) */ "}
+  export query_nested_loop_join=${query/"SELECT "/"SELECT /*+ FORCE_JOIN(NLJ) */ "}
 
 
   function normal_run {
