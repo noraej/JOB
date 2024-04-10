@@ -2,7 +2,7 @@
 set -e
 
 CURDIR=$(cd `dirname $0`; pwd)
-OUTDIR=$CURDIR/results/round3/
+OUTDIR=$CURDIR/results/run-test-computer/
 
 if [ ! -e $OUTDIR ]; then
   mkdir -p $OUTDIR
@@ -10,8 +10,8 @@ fi
 
 cd $CURDIR
 
-mysql_sock="/var/folders/k0/qhfn3fhn0wd8t_kc0ksszklh0000gp/T/Fb7pMsFHE5/mysqld.1.sock"
-mysql_client="~/Documents/Master/Code/mysql-server-robust-planning/build-release/bin/mysql"
+mysql_client="/home/leag/MySQL/mysql-server-robust-planning/cmake-build-release/bin/mysql"
+mysql_sock="/home/leag/MySQL/mysql-server-robust-planning/cmake-build-release/mysql-test/var/tmp/mysqld.1.sock"
 
 export mysql_connect="$mysql_client -u root -S $mysql_sock -D imdbload -t"
 
@@ -22,7 +22,6 @@ FLUSH OPTIMIZER_COSTS;
 
 SET PERSIST innodb_stats_persistent = 1;
 SET PERSIST innodb_stats_auto_recalc = 0;
--- SET PERSIST innodb_stats_persistent = 0;
 
 SET GLOBAL optimizer_switch='hypergraph_optimizer=on';
 eof"
@@ -83,6 +82,11 @@ eof"
 $query_hash_join
 eof"
 }
+  if [ -s "$outputjson" ]
+    then
+      echo "Results for $name already collected, skipping..."
+      continue
+    fi
 
   export -f normal_run
   export -f with_nested_loop_join
