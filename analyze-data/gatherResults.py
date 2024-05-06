@@ -3,14 +3,14 @@ import os
 from collections import defaultdict
 
 
-#directory where results are stores
-directory = "results/json-results"
+#directory where results are stored
+directory = "force-join-results/json-results"
 
 #output path for json file
-output_path_json = "results/collected_res/all_queries.json"
+output_path_json = "force-join-results/collected_res/all_queries.json"
 
 #output path for md file
-output_path_md = "results/collected_res/all_queries.md"
+output_path_md = "force-join-results/collected_res/all_queries.md"
 
 
 
