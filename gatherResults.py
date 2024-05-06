@@ -4,7 +4,7 @@ from collections import defaultdict
 
 
 #directory where results are stores
-directory = "results/res"
+directory = "results/json-results"
 
 #output path for json file
 output_path_json = "results/collected_res/all_queries.json"
@@ -47,6 +47,14 @@ no_force_counter = 0
 hj_counter = 0
 nlj_counter = 0
 
+def find_relative(n, nlj, hj):
+    m = min(hj, nlj, n)
+    return {
+        "normal_run": n/m,
+        "with_nested_loop_join": nlj/m,
+        "with_hash_join": hj/m
+    }
+
 
 # Identifies interesting results 
 def compare(noForce, nlj, hj):
@@ -63,6 +71,8 @@ def compare(noForce, nlj, hj):
     #Indicates that nlj was chosen, but hj might be a better choice
     if ((hj < noForce) & (hj < nlj) and (noForce/2 < nlj < noForce*2)):
         return "Hash join was not chosen, but is faster"
+    
+  
 
     else: return "Not interesting"
 
@@ -120,6 +130,10 @@ with open(output_path_md, 'w') as md_file:
                 hjMean = result["mean"]
 
         interesting_flag = compare(normMean, nljMean, hjMean)
+        relative_dict = find_relative(normMean, nljMean, hjMean)
+
+        print(relative_dict["normal_run"])
+        print(str(result["command"]))
 
         if(interesting_flag == "Not interesting"):
             no_force_counter = no_force_counter + 1 
@@ -133,8 +147,8 @@ with open(output_path_md, 'w') as md_file:
 
         md_file.write(f"## {interesting_mark(interesting_flag)} {convertFileName(source_file)}\n\n")
         md_file.write(interesting_flag + " \n\n")
-        md_file.write("| Join method | Mean | StdDev | Median | Min | Max |\n")
-        md_file.write("| ----------- | ---- | ------ | ------ | --- | --- |\n")
+        md_file.write("| Join method | Mean | StdDev | Median | Min | Max | Relative |\n")
+        md_file.write("| ----------- | ---- | ------ | ------ | --- | --- | ---------|\n")
 
         for result in data["results"]:
             command = convertCommand(result["command"])
@@ -143,8 +157,9 @@ with open(output_path_md, 'w') as md_file:
             median = str(round(result["median"], 2))
             min_val = str(round(result["min"], 2))
             max_val = str(round(result["max"], 2))
+            relative = round(relative_dict[result["command"]], 3)
 
-            md_file.write(f"| {command} | {mean} | {stddev} | {median} | {min_val} | {max_val} |\n")
+            md_file.write(f"| {command} | {mean} | {stddev} | {median} | {min_val} | {max_val} | {relative}\n")
 
 
 print("No force: ", no_force_counter, " hash: ", hj_counter, "nlj: ", nlj_counter)
