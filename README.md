@@ -65,7 +65,7 @@ We use hyperfine as a benchmarking-tool to measure the queries, you'll therefore
 ```sqlmysql
 $ ./run_queries.sh
 ```
-This will run the queries in the queries-folder one-by-one, both with and without re-optimization, and output the results into the results-folder as both markdown and json-files for each query. You'll be able to see the progress in the terminal as the queries are being executed.
+This will run the queries in the queries-folder one-by-one and output the results into the results-folder as both markdown and json-files for each query. You'll be able to see the progress in the terminal as the queries are being executed.
 
 
 To run queries for the robust query optimization implementation, run the following in your terminal: 
